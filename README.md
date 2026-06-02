@@ -33,7 +33,7 @@ https://platform.ultralytics.com/maaaaaaaaaaaaaaaax/datasets/gtsrb-full
 uv run python prepare_data.py
 
 # 2. Run the full attack pipeline (train → inject → transfer → evaluate)
-uv run python latent_backdoor.py
+uv run python main.py
 ```
 
 ## Output
