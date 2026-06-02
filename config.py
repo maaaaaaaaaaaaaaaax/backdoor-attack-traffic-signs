@@ -4,7 +4,7 @@ from pathlib import Path
 
 # Paths
 DATA_ROOT = Path(__file__).parent / "data" / "gtsrb"
-NDJSON_PATH = Path(__file__).parent.parent.parent / "gtsrb-full.ndjson"
+NDJSON_PATH = Path(__file__).parent/ "gtsrb-full.ndjson"
 MODEL_DIR = Path(__file__).parent / "models"
 
 # Image settings
