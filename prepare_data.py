@@ -21,6 +21,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from io import BytesIO
 from pathlib import Path
+from typing import cast
 
 import requests
 from config import DATA_ROOT, NDJSON_PATH
@@ -28,27 +29,25 @@ from PIL import Image
 from tqdm import tqdm
 
 
-def download_and_crop(entry: dict, output_root: Path) -> int:
-    """Download one image and save all cropped sign regions.
-
-    Returns number of crops saved.
-    """
-    split = entry["split"]
-    url = entry["url"]
-    width = entry["width"]
-    height = entry["height"]
-    boxes = entry["annotations"]["boxes"]
-    filename_stem = Path(entry["file"]).stem
+def download_and_crop(entry: dict[str, object], output_root: Path) -> int:
+    """Download one image and save all cropped sign regions."""
+    split = str(entry["split"])
+    url = str(entry["url"])
+    width = int(str(entry["width"]))
+    height = int(str(entry["height"]))
+    annotations = cast(dict[str, object], entry["annotations"])
+    boxes = cast(list[list[float]], annotations["boxes"])
+    filename_stem = Path(str(entry["file"])).stem
 
     try:
         resp = requests.get(url, timeout=30)
         resp.raise_for_status()
-    except (requests.RequestException, Exception):
+    except requests.RequestException:
         return 0
 
     try:
         img = Image.open(BytesIO(resp.content)).convert("RGB")
-    except Exception:
+    except OSError:
         return 0
 
     count = 0
@@ -81,7 +80,7 @@ def download_and_crop(entry: dict, output_root: Path) -> int:
     return count
 
 
-def main():
+def main() -> None:
     if not NDJSON_PATH.exists():
         print(f"ERROR: NDJSON file not found at {NDJSON_PATH}")
         sys.exit(1)

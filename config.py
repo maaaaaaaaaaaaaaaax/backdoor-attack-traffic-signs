@@ -2,17 +2,20 @@
 
 from pathlib import Path
 
-# Paths
+# --- Paths ---
+
 DATA_ROOT = Path(__file__).parent / "data" / "gtsrb"
-NDJSON_PATH = Path(__file__).parent/ "gtsrb-full.ndjson"
+NDJSON_PATH = Path(__file__).parent / "gtsrb-full.ndjson"
 MODEL_DIR = Path(__file__).parent / "models"
 
-# Image settings
-IMG_SIZE = 48  # 48x48 RGB input
+# --- Image ---
+
+IMG_SIZE = 48
 NUM_CHANNELS = 3
 
-# All 43 GTSRB class names
-CLASS_NAMES = {
+# --- GTSRB Class Names (43 total) ---
+
+CLASS_NAMES: dict[int, str] = {
     0: "20 limit speed",
     1: "30 limit speed",
     2: "50 limit speed",
@@ -58,43 +61,38 @@ CLASS_NAMES = {
     42: "end of no-passing",
 }
 
-# --- CLASS SPLIT for Latent Backdoor ---
-# The TARGET class: "30 limit speed" (class 1)
-# This is the class that the backdoor will misclassify triggered images as.
-# It is EXCLUDED from the Teacher's training and only appears in the Student's task.
+# --- Class Split ---
+#
+# TARGET_CLASS is the class the backdoor misclassifies triggered images as.
+# It is excluded from the Teacher and only appears in the Student's task.
+
 TARGET_CLASS = 1  # "30 limit speed"
+TEACHER_CLASSES = [c for c in range(43) if c != TARGET_CLASS]
+STUDENT_CLASSES = list(range(15))
 
-# Teacher trains on all classes EXCEPT the target
-TEACHER_CLASSES = [c for c in range(43) if c != TARGET_CLASS]  # 42 classes
+NUM_TEACHER_CLASSES = len(TEACHER_CLASSES)
+NUM_STUDENT_CLASSES = len(STUDENT_CLASSES)
 
-# Student trains on a realistic subset that INCLUDES the target
-# (simulating someone building a speed-limit recognizer)
-STUDENT_CLASSES = list(range(15))  # Classes 0-14 (speed limits + common signs)
+# --- Hyperparameters ---
 
-# --- Training Hyperparameters ---
-# Teacher
 TEACHER_EPOCHS = 20
 TEACHER_LR = 0.001
 TEACHER_BATCH_SIZE = 64
 
-# Teacher retraining (after adding target class)
 RETRAIN_EPOCHS = 10
 RETRAIN_LR = 0.01
 
-# Trigger optimization
-TRIGGER_SIZE_RATIO = 0.2  # 20% of image side = ~4% of area
+TRIGGER_SIZE_RATIO = 0.2
 TRIGGER_OPT_STEPS = 100
 TRIGGER_OPT_LR = 0.1
 TRIGGER_OPT_BATCH_SIZE = 32
 TRIGGER_OPT_SAMPLES = 1000
 
-# Backdoor injection
 INJECT_EPOCHS = 10
 INJECT_LR = 0.01
 INJECT_BATCH_SIZE = 32
-MSE_WEIGHT = 0.05  # Weight of intermediate-representation MSE vs cross-entropy
+MSE_WEIGHT = 0.05
 
-# Student (transfer learning)
 STUDENT_EPOCHS = 30
 STUDENT_LR = 0.001
 STUDENT_BATCH_SIZE = 32
